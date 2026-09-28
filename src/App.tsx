@@ -269,6 +269,33 @@ function App() {
   const activeGuessCount = activeGuessIds.length
   const solved = Boolean(activeAnswer && activeGuessIds.includes(activeAnswer.id))
   const finished = solved || gaveUp
+  const allDailyModesSolved = mode === 'daily'
+    && guesses.includes(answer.id)
+    && posterGuesses.includes(wantedAnswer.id)
+    && Boolean(fruitUserAnswer && fruitGuesses.includes(fruitUserAnswer.id))
+
+  async function shareDailyResults() {
+    const shareUrl = `${window.location.origin}${window.location.pathname}`
+    const shareText = [
+      '🏴‍☠️ Grand Line Guess · Daily Logbook',
+      `🧭 Classic: ${guesses.length} guesses`,
+      `🍈 Devil Fruit: ${fruitGuesses.length} guesses`,
+      `📜 Wanted Poster: ${posterGuesses.length} guesses`,
+      `🌊 ${shareUrl}`,
+    ].join('\n')
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Grand Line Guess', text: shareText, url: shareUrl })
+      } else {
+        await navigator.clipboard.writeText(shareText)
+        setMessage('Daily results copied. Share them with your crew!')
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return
+      setMessage('Could not share automatically. Try copying the page link from your browser.')
+    }
+  }
 
   function chooseMode(nextMode: 'daily' | 'unlimited') {
     setMode(nextMode)
@@ -287,7 +314,6 @@ function App() {
   function chooseGameMode(nextMode: 'classic' | 'japanese-fruit' | 'wanted') {
     setGameMode(nextMode)
     setGaveUp(false)
-    setDismissWin(false)
     setQuery('')
     setActiveSuggestion(-1)
     setMessage('')
@@ -324,7 +350,7 @@ function App() {
     if (gameMode === 'japanese-fruit') setFruitGuesses(nextGuesses)
     else if (gameMode === 'wanted') setPosterGuesses(nextGuesses)
     else setGuesses(nextGuesses)
-    setDismissWin(false)
+    if (activeAnswer && character.id === activeAnswer.id) setDismissWin(false)
     if (mode === 'daily') {
       const dayOffset = gameMode === 'wanted' ? 1 : gameMode === 'japanese-fruit' ? 2 : 0
       const storageKey = gameMode === 'wanted' ? WANTED_STORAGE_KEY : gameMode === 'japanese-fruit' ? FRUIT_STORAGE_KEY : STORAGE_KEY
@@ -414,7 +440,6 @@ function App() {
             <div className="toolbar-line" />
             <div className="mode-picker" role="group" aria-label="Game mode"><button className={mode === 'daily' ? 'selected' : ''} onClick={() => chooseMode('daily')}>DAILY</button><button className={mode === 'unlimited' ? 'selected' : ''} onClick={() => chooseMode('unlimited')}>UNLIMITED</button></div>
             {gameMode !== 'japanese-fruit' && <button className="text-button roster-toggle" onClick={() => setShowRoster((visible) => !visible)} aria-expanded={showRoster}>{showRoster ? 'Hide roster' : `Browse roster · ${roster.length}`}</button>}
-            {activeGuessCount > 0 && <button className="reset-button" onClick={() => resetGame()} title="Clear this round's guesses" aria-label="Clear this round's guesses">↻</button>}
           </div>
 
           <div className="game-type-picker" role="group" aria-label="Puzzle type">
@@ -422,6 +447,11 @@ function App() {
             <button className={gameMode === 'japanese-fruit' ? 'selected' : ''} aria-pressed={gameMode === 'japanese-fruit'} onClick={() => chooseGameMode('japanese-fruit')}>DEVIL FRUIT <span>日本語</span></button>
             <button className={gameMode === 'wanted' ? 'selected' : ''} aria-pressed={gameMode === 'wanted'} onClick={() => chooseGameMode('wanted')}>WANTED POSTER</button>
           </div>
+
+          {allDailyModesSolved && <section className="daily-share" aria-label="Share daily results">
+            <div><strong>🏴‍☠️ The whole logbook is complete!</strong><span>Your crew deserves to see this run.</span></div>
+            <button onClick={shareDailyResults}>Share results <span aria-hidden="true">↗</span></button>
+          </section>}
 
           {gameMode === 'japanese-fruit' && <div className="fruit-clue" aria-label="Japanese Devil Fruit clue">
             <span>WHO ATE THIS DEVIL FRUIT?</span>
