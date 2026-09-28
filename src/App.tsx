@@ -282,7 +282,7 @@ function App() {
       `🍈 Devil Fruit: ${fruitGuesses.length} guesses`,
       `📜 Wanted Poster: ${posterGuesses.length} guesses`,
       `🌊 ${shareUrl}`,
-    ].join('\n')
+    ].join('\n') 
 
     try {
       if (navigator.share) {
