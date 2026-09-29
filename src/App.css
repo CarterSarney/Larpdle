@@ -62,11 +62,15 @@ h1 { font: 700 clamp(36px, 4vw, 54px)/1.05 var(--body); letter-spacing: 0; margi
 .result-banner span { color: #607269; font-size: 11px; }
 .daily-share { min-height: 66px; margin: 0 0 14px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid #a9c2a8; border-radius: 12px; background: #e3edda; }
 .daily-share > div { display: flex; flex-direction: column; gap: 3px; }
+.daily-share > .daily-share-copy { min-width: 0; }
 .daily-share strong { color: #17382e; font: 700 12px var(--display); }
-.daily-share > div span { color: #607269; font-size: 10px; }
-.daily-share button { min-height: 38px; flex: 0 0 auto; padding: 0 13px; border: 0; border-radius: 9px; background: #397a60; color: #f4f3df; cursor: pointer; font: 700 10px var(--body); }
+.daily-share > div span { color: #607269; font-size: 10px; line-height: 1.5; }
+.daily-share-actions { flex: 0 0 auto; display: flex; gap: 7px; }
+.daily-share button { min-height: 36px; flex: 0 0 auto; padding: 0 11px; border: 0; border-radius: 8px; background: #397a60; color: #f4f3df; cursor: pointer; font: 700 10px var(--body); }
 .daily-share button:hover { background: #285e49; }
 .daily-share button span { margin-left: 5px; font-size: 14px; }
+.daily-share button.copy-results-button { border: 1px solid #89a88e; background: transparent; color: #285e49; }
+.daily-share button.copy-results-button:hover { background: #d0e2cb; }
 .wanted-card { width: min(100%, 355px); min-height: 185px; margin: 0 auto 17px; padding: 12px; display: grid; grid-template-columns: 1fr 132px; grid-template-rows: 1fr auto; gap: 8px 12px; position: relative; overflow: hidden; border: 3px double #8e6337; border-radius: 14px; color: #573c2d; background: #efe3c5; box-shadow: 0 9px 18px rgba(40,38,24,.12); transform: rotate(-1deg); }
 .wanted-card::before { content: ''; position: absolute; inset: 5px; border: 1px solid rgba(142,99,55,.4); border-radius: 8px; pointer-events: none; }
 .wanted-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 5px; z-index: 1; }
@@ -206,6 +210,8 @@ h1 { font: 700 clamp(36px, 4vw, 54px)/1.05 var(--body); letter-spacing: 0; margi
 .app-shell[data-theme='dark'] .daily-share strong { color: #f0efdf; }
 .app-shell[data-theme='dark'] .daily-share > div span { color: #b9c7b9; }
 .app-shell[data-theme='dark'] .daily-share button { background: #397a60; color: #f4f3df; }
+.app-shell[data-theme='dark'] .daily-share button.copy-results-button { border-color: #688c7a; background: transparent; color: #c7dccb; }
+.app-shell[data-theme='dark'] .daily-share button.copy-results-button:hover { background: #304940; }
 .app-shell[data-theme='dark'] .give-up-button { color: #f0a792; border-color: #c86853; }
 .app-shell[data-theme='dark'] .give-up-button:hover { background: #c86853; color: #fff8e7; }
 .app-shell[data-theme='dark'] .countdown { color: #f1d783; }

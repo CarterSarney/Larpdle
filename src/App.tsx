@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { characters, type Character } from './characters'
 import { loadArchiveRoster, loadDevilFruitRoster, type DevilFruit } from './archiveRoster'
+import PiratesJourney from './PiratesJourney'
 import './App.css'
 
 const columns = ['Character', 'Gender', 'Affiliation', 'Devil Fruit', 'Haki', 'Last Bounty', 'Height', 'Age', 'Origin', 'First Arc'] as const
@@ -164,6 +165,7 @@ function compare(guess: Character, answer: Character): CellResult[] {
 function App() {
   const [roster, setRoster] = useState<Character[]>(readCachedRoster)
   const [fruits, setFruits] = useState<DevilFruit[]>(readCachedFruits)
+  const [activeGame, setActiveGame] = useState<'home' | 'guess' | 'journey'>('home')
   const [gameMode, setGameMode] = useState<'classic' | 'japanese-fruit' | 'wanted'>('classic')
   const [mode, setMode] = useState<'daily' | 'unlimited'>('daily')
   const modeRef = useRef(mode)
@@ -274,26 +276,38 @@ function App() {
     && posterGuesses.includes(wantedAnswer.id)
     && Boolean(fruitUserAnswer && fruitGuesses.includes(fruitUserAnswer.id))
 
-  async function shareDailyResults() {
+  function dailyResultsText() {
     const shareUrl = `${window.location.origin}${window.location.pathname}`
-    const shareText = [
+    return [
       '🏴‍☠️ Grand Line Guess · Daily Logbook',
-      `🧭 Classic: ${guesses.length} guesses`,
-      `🍈 Devil Fruit: ${fruitGuesses.length} guesses`,
-      `📜 Wanted Poster: ${posterGuesses.length} guesses`,
+      `🧭 Classic: Solved in ${guesses.length} ${guesses.length === 1 ? 'guess' : 'guesses'}`,
+      `🍈 Devil Fruit: Solved in ${fruitGuesses.length} ${fruitGuesses.length === 1 ? 'guess' : 'guesses'}`,
+      `📜 Wanted Poster: Solved in ${posterGuesses.length} ${posterGuesses.length === 1 ? 'guess' : 'guesses'}`,
       `🌊 ${shareUrl}`,
     ].join('\n') 
+  }
 
+  async function copyDailyResults() {
+    try {
+      await navigator.clipboard.writeText(dailyResultsText())
+      setMessage('Daily results copied. Share them with your crew!')
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return
+      setMessage('Could not copy results. Check your browser clipboard permissions.')
+    }
+  }
+
+  async function shareDailyResults() {
+    const shareUrl = `${window.location.origin}${window.location.pathname}`
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Grand Line Guess', text: shareText, url: shareUrl })
+        await navigator.share({ title: 'Grand Line Guess', text: dailyResultsText(), url: shareUrl })
       } else {
-        await navigator.clipboard.writeText(shareText)
-        setMessage('Daily results copied. Share them with your crew!')
+        await copyDailyResults()
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return
-      setMessage('Could not share automatically. Try copying the page link from your browser.')
+      setMessage('Could not share automatically. Try copying the results instead.')
     }
   }
 
@@ -423,11 +437,27 @@ function App() {
   return (
     <div className="app-shell" data-theme={theme}>
       <header className="topbar">
-        <a className="wordmark" href="#top" aria-label="Grand Line Guess home"><span className="mark">GL</span><span>GRAND LINE <b>GUESS</b></span></a>
-        <div className="topbar-right"><span className="edition"><span className="live-dot" /> {mode === 'daily' ? 'DAILY DISPATCH' : 'OPEN WATERS'}</span>{mode === 'daily' && <span className="countdown"><small>NEXT PUZZLE</small><b>{countdownText(nextDailyReset(now) - now.getTime())}</b></span>}<button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`} title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>{theme === 'light' ? '☾' : '☀'}</button><span className="date-stamp">{new Intl.DateTimeFormat('en', { month: 'short', day: '2-digit', timeZone: 'UTC' }).format(now)}</span></div>
+        <a className="wordmark" href="#top" aria-label="Grand Line Arcade home" onClick={(event) => { event.preventDefault(); setActiveGame('home') }}><span className="mark">GL</span><span>GRAND LINE <b>ARCADE</b></span></a>
+        <div className="topbar-right"><span className="edition"><span className="live-dot" /> {activeGame === 'home' ? 'CHOOSE YOUR GAME' : activeGame === 'journey' ? "PIRATES' JOURNEY" : mode === 'daily' ? 'DAILY DISPATCH' : 'OPEN WATERS'}</span>{activeGame === 'guess' && mode === 'daily' && <span className="countdown"><small>NEXT PUZZLE</small><b>{countdownText(nextDailyReset(now) - now.getTime())}</b></span>}<button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`} title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>{theme === 'light' ? '☾' : '☀'}</button><span className="date-stamp">{new Intl.DateTimeFormat('en', { month: 'short', day: '2-digit', timeZone: 'UTC' }).format(now)}</span></div>
       </header>
 
       <main id="top">
+        {activeGame === 'home' ? <section className="arcade-home" aria-labelledby="arcade-title">
+          <div className="arcade-heading"><span className="arcade-kicker">THE GRAND LINE ARCADE</span><h1 id="arcade-title">Choose your game.</h1><p>Two ways to test your knowledge of the seas.</p></div>
+          <div className="arcade-games">
+            <button className="arcade-card guess-card" onClick={() => setActiveGame('guess')}>
+              <span className="arcade-card-copy"><small>DAILY CHARACTER PUZZLES</small><strong>Grand Line Guess</strong><span>Read the clues. Find the character.</span><b>ENTER GAME <i aria-hidden="true">↗</i></b></span>
+              <img src={roster.find((character) => character.id === 'luffy')?.image ?? 'https://oparchive.com/images/characters/Monkey_D._Luffy.webp'} alt="Monkey D. Luffy" />
+              <span className="arcade-index">01</span>
+            </button>
+            <button className="arcade-card journey-card" onClick={() => setActiveGame('journey')}>
+              <span className="arcade-card-copy"><small>DAILY CREW DRAFT</small><strong>Pirates Journey</strong><span>Spin for a crew. Build your legend.</span><b>SET SAIL <i aria-hidden="true">↗</i></b></span>
+              <img src={roster.find((character) => character.id === 'shanks')?.image ?? 'https://oparchive.com/images/characters/Shanks.webp'} alt="Red-Haired Shanks" />
+              <span className="arcade-index">02</span>
+            </button>
+          </div>
+          <div className="arcade-footer"><span>ONE WORLD. TWO CHALLENGES.</span><span>UNOFFICIAL ONE PIECE FAN GAME</span></div>
+        </section> : activeGame === 'journey' ? <PiratesJourney roster={roster} /> : <>
         <section className="intro">
           <div className="intro-copy">
             <h1>Grand Line Guess</h1>
@@ -448,9 +478,9 @@ function App() {
             <button className={gameMode === 'wanted' ? 'selected' : ''} aria-pressed={gameMode === 'wanted'} onClick={() => chooseGameMode('wanted')}>WANTED POSTER</button>
           </div>
 
-          {allDailyModesSolved && <section className="daily-share" aria-label="Share daily results">
-            <div><strong>🏴‍☠️ The whole logbook is complete!</strong><span>Your crew deserves to see this run.</span></div>
-            <button onClick={shareDailyResults}>Share results <span aria-hidden="true">↗</span></button>
+          {gameMode === 'wanted' && allDailyModesSolved && <section className="daily-share" aria-label="Share daily results">
+            <div className="daily-share-copy"><strong>Share today's run?</strong><span>Your results: Classic · {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'} &nbsp; Devil Fruit · {fruitGuesses.length} {fruitGuesses.length === 1 ? 'guess' : 'guesses'} &nbsp; Wanted Poster · {posterGuesses.length} {posterGuesses.length === 1 ? 'guess' : 'guesses'}</span></div>
+            <div className="daily-share-actions"><button onClick={shareDailyResults}>Share <span aria-hidden="true">↗</span></button><button className="copy-results-button" onClick={copyDailyResults}>Copy text</button></div>
           </section>}
 
           {gameMode === 'japanese-fruit' && <div className="fruit-clue" aria-label="Japanese Devil Fruit clue">
@@ -505,9 +535,9 @@ function App() {
           {gameMode === 'classic' ? <div className="legend legend-bottom" aria-label="Clue color legend"><span><i className="legend-swatch exact" /> GREEN · EXACT MATCH</span><span><i className="legend-swatch close" /> YELLOW · CLOSE OR SHARED</span><span><i className="legend-swatch miss" /> GREY · NO MATCH</span><span><i className="legend-arrow">↑</i> ARROW · VALUE IS HIGHER</span></div> : <div className="legend legend-bottom" aria-label="Guess result legend"><span><i className="legend-swatch exact" /> GREEN · CORRECT CHARACTER</span><span><i className="legend-swatch miss" /> GREY · NOT THE ANSWER</span></div>}
           <footer className="game-footer"><p>Roster data from <a href="https://oparchive.com/pages/characters.html" target="_blank" rel="noreferrer">One Piece Archive</a>. Gender is inferred where the archive has no field; entries have at most one unknown clue.</p><span>{mode === 'daily' ? `NEXT PUZZLE IN ${countdownText(nextDailyReset(now) - now.getTime())}` : 'UNLIMITED PLAY'}</span></footer>
         </section>
-
+        </>}
       </main>
-      <div className="page-end"><span>GRAND LINE GUESS</span><span>UNOFFICIAL FAN-MADE GAME · NOT AFFILIATED WITH ONE PIECE OR OPARCHIVE</span></div>
+      <div className="page-end"><span>GRAND LINE ARCADE</span><span>UNOFFICIAL FAN-MADE GAMES · NOT AFFILIATED WITH ONE PIECE OR OPARCHIVE</span></div>
       {solved && !dismissWin && <div className="win-overlay" onClick={() => setDismissWin(true)}><section className="win-dialog" role="dialog" aria-modal="true" aria-labelledby="win-title" onClick={(event) => event.stopPropagation()}><button className="win-close" aria-label="Close victory popup" onClick={() => setDismissWin(true)}>×</button><span className="win-eyebrow">✦ THE LOGBOOK IS COMPLETE ✦</span><h2 id="win-title">YOU GOT 'EM!</h2>{gameMode === 'classic' && <img className="win-portrait" src={activeAnswer?.image ?? ''} alt={activeAnswer?.name ?? 'Character'} onError={(event) => { event.currentTarget.hidden = true }} />}<strong className="win-name">{activeAnswer?.name}</strong>{gameMode === 'classic' && <p>{activeGuessCount === 1 ? 'A perfect first shot!' : `Found in ${activeGuessCount} guesses. Nice work, captain.`}</p>}<button className="win-play-again" onClick={() => mode === 'unlimited' ? resetGame(true) : chooseMode('unlimited')}>SAIL AGAIN <span>↗</span></button></section></div>}
     </div>
   )

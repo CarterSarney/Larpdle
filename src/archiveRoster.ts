@@ -2,7 +2,28 @@ import type { Character } from './characters'
 
 const archiveUrl = 'https://oparchive.com/data/characters.json'
 const fruitUrl = 'https://oparchive.com/data/devil_fruits.json'
+const maximumRosterSize = 500
 const featuredNames = ['Arlong', 'Kuro', 'Don Krieg', 'Hatchan', 'Alvida', 'Smoker', 'Tashigi', 'Crocodile', 'Enel', 'Rob Lucci', 'Kaku', 'Gecko Moria', 'Magellan', 'Hody Jones', 'Caesar Clown', 'Doflamingo', 'Katakuri', 'King', 'Queen', 'Jack', 'Yamato', 'King Neptune', 'Shirahoshi', 'Carrot', 'Pedro', 'Rebecca', 'Kyros', 'Bartolomeo', 'Cavendish', 'Bon Clay', 'Vivi', 'Ace', 'Sabo', 'Shanks', 'Blackbeard', 'Koby', 'Garp', 'Dragon', 'Akainu', 'Aokiji', 'Kizaru', 'Fujitora', 'Greenbull', 'Kuma', 'Ivankov', 'Rayleigh', 'Oden', 'Kinemon', 'Momonosuke', 'Tama', 'Big Mom', 'Kaido', 'King', 'Queen', 'Ulti', 'Page One', "Who's-Who", 'Sasaki', 'Black Maria', 'Marco', 'Jozu', 'Vista', 'Benn Beckman', 'Yasopp', 'Lucky Roux', 'Law', 'Kid', 'Killer', 'Bonney', 'Urouge', 'Apoo', 'Hawkins', 'Drake']
+const featuredCharlotteNames = ['Charlotte Linlin', 'Charlotte Katakuri', 'Charlotte Cracker', 'Charlotte Smoothie', 'Charlotte Pudding', "Charlotte Mont-d'Or"]
+const storyRelevantNames = [
+  'Helmeppo', 'Morgan', 'Kaya', 'Merry', 'Gin', 'Pearl', 'Bellemere', 'Nojiko', 'Genzo', 'Kuroobi', 'Jango', 'Zeff', 'Patty', 'Carne',
+  'Nefertari Cobra', 'Pell', 'Chaka', 'Igaram', 'Koza', 'Daz Bones', 'Mr. 1', 'Mr. 3', 'Mr. 4', 'Mr. 5',
+  'Miss Goldenweek', 'Miss Valentine', 'Miss Doublefinger', 'Miss Merry Christmas', 'Bentham',
+  'Mont Blanc Noland', 'Kalgara', 'Wyper', 'Conis', 'Gan Fall', 'Pagaya', 'Ohm', 'Satori', 'Gedatsu', 'Professor Clover', 'Clou D. Clover', 'Clover', 'Nico Olvia',
+  'Iceburg', 'Paulie', 'Tom', 'Kokoro', 'Chimney', 'Zambai', 'Rob Lucci', 'Blueno', 'Jabra', 'Kalifa', 'Spandam', 'Fukuro', 'Kumadori',
+  'Perona', 'Absalom', 'Dr. Hogback', 'Oars', 'Shimotsuki Ryuma',
+  'Silvers Rayleigh', 'Camie', 'Duval', 'Sentomaru', 'Capone Bege', 'Jewelry Bonney', 'Scratchmen Apoo', 'Basil Hawkins', 'Caribou', 'Coribou', 'Bepo',
+  'Hannyabal', 'Shiryu', 'Domino', 'Inazuma', 'Emporio Ivankov', 'Sengoku', 'Little Oars Jr.', 'Curiel', 'Rakuyo', 'Onigumo', 'Tsuru', 'Hina', 'Momonga',
+  'Fisher Tiger', 'Otohime', 'Vander Decken IX', 'Fukaboshi', 'Ryuboshi', 'Manboshi', 'Pappag', 'Vergo', 'Monet', 'Brownbeard', 'Kinemon', 'Momonosuke',
+  'Donquixote Rosinante', 'Corazon', 'Rebecca', 'Kyros', 'Sai', 'Hajrudin', 'Senior Pink', 'Diamante', 'Trebol', 'Pica', 'Viola', 'Leo', 'Mansherry', 'Bellamy', 'Baby 5', 'Buffalo', 'Gladius', 'Dellinger', 'Lao G',
+  'Inuarashi', 'Nekomamushi', 'Raizo', 'Kanjuro', 'Carrot', 'Wanda', 'Zunesha', 'Vinsmoke Judge', 'Vinsmoke Reiju', 'Vinsmoke Ichiji', 'Vinsmoke Niji', 'Vinsmoke Yonji', 'Pekoms', 'Tamago',
+  'Kozuki Oden', 'Kozuki Toki', 'Kozuki Hiyori', 'Denjiro', 'Ashura Doji', 'Kawamatsu', 'Hyogoro', 'Kikunojo', 'Izo', 'Fukurokuju', 'X Drake', 'Apoo',
+  'Dr. Vegapunk', 'Vegapunk', 'Lilith', 'Shaka', 'Edison', 'Pythagoras', 'Atlas', 'York', 'Stussy', 'S-Snake', 'S-Hawk', 'S-Bear', 'S-Shark',
+  'Monkey D. Dragon', 'Kuzan', 'Borsalino', 'Sakazuki', 'Issho', 'Aramaki', 'Kaku', 'Rob Lucci', 'Catarina Devon', 'Jesus Burgess', 'Van Augur',
+  'Kureha', 'Crocus', 'Hiriluk', 'Hogback', 'Dr. Kureha', 'Laboon', 'Brook', 'Jozu', 'Vista', 'Marco', 'Benn Beckman', 'Yasopp', 'Lucky Roux',
+  'Wapol', 'Dalton', 'Drum', 'Chess', 'Kuromarimo', 'Foxy', 'Porche', 'Hamburg', 'Aokiji', 'Gaimon', 'Dorry', 'Brogy', 'Oimo', 'Kashii', 'Mr. 2 Bon Clay',
+  'Sadi', 'Saldeath', 'Karasu', 'Lindbergh', 'Kujaku',
+]
 const arcStarts: Array<[number, string]> = [
   [1, 'Romance Dawn'], [8, 'Orange Town'], [22, 'Syrup Village'], [42, 'Baratie'], [69, 'Arlong Park'],
   [96, 'Loguetown'], [101, 'Reverse Mountain'], [106, 'Whisky Peak'], [115, 'Little Garden'], [130, 'Drum Island'],
@@ -124,9 +145,6 @@ export async function loadArchiveRoster(baseRoster: Character[]): Promise<Charac
     const fruitName = typeof record.devil_fruit === 'string' && record.devil_fruit.trim() ? record.devil_fruit.trim() : null
     const fruitType = fruitTypesFor(fruitName, fruits)
     const haki = Array.isArray(record.haki) ? record.haki.filter((value): value is string => typeof value === 'string' && Boolean(value.trim())) : []
-    const archiveTraits = [record.age, record.affiliation, record.bounty, record.height, record.origin, record.first_appearance_arc]
-    const unknownTraits = archiveTraits.filter(isMissing).length + (fruitName && !fruitType ? 1 : 0) + (record.haki === null || record.haki === undefined ? 1 : 0)
-    if (unknownTraits > 1) return []
 
     const firstArc = typeof record.first_appearance_arc === 'string' ? arcFor(record.first_appearance_arc) : 'Unknown'
     return [{
@@ -153,7 +171,8 @@ export async function loadArchiveRoster(baseRoster: Character[]): Promise<Charac
     return archiveMatch ? { ...character, age: archiveMatch.age, image: archiveMatch.image } : { ...character, image: character.image ?? fallbackImage }
   })
   const usedKeys = new Set(enrichedBase.map((character) => canonical(character.name)))
-  const featured = new Set(featuredNames.map(canonical))
+  const featured = new Set([...featuredNames, ...featuredCharlotteNames, ...storyRelevantNames].map(canonical))
+  const allowedCharlotteNames = new Set(featuredCharlotteNames.map(canonical))
   const rankedCandidates = candidates.sort((left, right) => {
     const featuredDifference = Number(featured.has(canonical(right.name))) - Number(featured.has(canonical(left.name)))
     return featuredDifference || (right.bounty ?? -1) - (left.bounty ?? -1) || left.name.localeCompare(right.name)
@@ -161,10 +180,11 @@ export async function loadArchiveRoster(baseRoster: Character[]): Promise<Charac
   const merged: Character[] = [...enrichedBase]
   for (const candidate of rankedCandidates) {
     const key = canonical(candidate.name)
-    if (usedKeys.has(key)) continue
+    const isCharlotteFamily = /^Charlotte(?:\s|$)/i.test(candidate.name)
+    if (usedKeys.has(key) || !featured.has(key) || (isCharlotteFamily && !allowedCharlotteNames.has(key))) continue
     usedKeys.add(key)
     merged.push(candidate)
-    if (merged.length >= 200) break
+    if (merged.length >= maximumRosterSize) break
   }
   return merged
 }
